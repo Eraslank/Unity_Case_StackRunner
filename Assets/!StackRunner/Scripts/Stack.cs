@@ -92,7 +92,7 @@ public class Stack : MonoBehaviour
             //Calculate Realigned Pos
             var pos = lastStack.transform.localPosition + Vector3.forward * GameUtil.DefaultStackScale.z;
 
-            var lastStackWidth = lastStack.boxCollider.bounds.Width(true);
+            var lastStackWidth = lastStack.boxCollider.bounds.Width(false);
             if (onLeft.Value)
                 pos.x -= lastStackWidth - newWidth * .5f;
             else
