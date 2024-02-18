@@ -76,7 +76,7 @@ public class StackManager : MonoBehaviourSingleton<StackManager>
 
     private void OnPress()
     {
-        if (!autoPlay)
+        if (!autoPlay && !GameManager.Instance.finished)
             PlaceStack();
     }
 
@@ -88,7 +88,12 @@ public class StackManager : MonoBehaviourSingleton<StackManager>
         if (currentStack == null)
             return;
 
-        currentStack.Place();
+        if (!currentStack.Place())
+        {
+            GameManager.Instance.FinishLevel(false);
+            return;
+        }
+
         lastPlacedStack = currentStack;
         ++placedStackCount;
         ++persistentPlacedCount;
@@ -99,6 +104,7 @@ public class StackManager : MonoBehaviourSingleton<StackManager>
             yield return new WaitForFixedUpdate();
             GetNextStack();
         }
+
     }
 
     private void GetNextStack()
@@ -108,17 +114,16 @@ public class StackManager : MonoBehaviourSingleton<StackManager>
 
         bool isLast = placedStackCount + 1 == allowedStackCount;
 
+        Debug.Log("Get");
+
         currentStack = Instantiate(stackPrefab, stackHolder);
         currentStack.GetComponent<Renderer>().material.color = baseColor.GetNextHue(persistentPlacedCount);
-        currentStack.name = $"Stack {placedStackCount}";
+        currentStack.name = $"Stack {placedStackCount} ({persistentPlacedCount})";
         if (!placedFirstStack)
         {
             placedFirstStack = true;
-
-
             lastPlacedStack = currentStack;
             currentStack.Init(placedStackCount, persistentPlacedCount, lastPlacedStack, false, isLast, autoMove: false);
-
             currentStack.inPerfectPlace = true;
             PlaceStack();
 

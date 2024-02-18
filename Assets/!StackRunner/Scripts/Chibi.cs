@@ -31,6 +31,9 @@ public class Chibi : MonoBehaviour
     {
         Stack.OnPlace -= OnStackPlace;
         Stack.OnLastPlace -= OnLastPlace;
+
+        chibiT.DOKill();
+        chibiRoot.DOKill();
     }
     private void OnStackPlace(Stack sender, bool successful)
     {

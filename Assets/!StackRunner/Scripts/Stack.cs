@@ -135,6 +135,7 @@ public class Stack : MonoBehaviour
         if (last)
             OnLastPlace?.Invoke(this, false);
 
+        Fall();
         return false;
     }
 

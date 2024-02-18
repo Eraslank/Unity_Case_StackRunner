@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviourSingleton<GameManager>
 {
@@ -12,6 +13,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
     Level currentLevel;
 
+    public bool finished = false;
     public bool win = false;
 
     private void OnEnable()
@@ -39,14 +41,11 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
     private void OnLastPlace(Stack sender, bool successful)
     {
-        FinishLevel(true);
-        DOVirtual.DelayedCall(.5f, () => win = successful);
-
-        StackManager.CAN_PLACE = false;
+        FinishLevel(successful);
     }
     private void OnPress()
     {
-        if (!win)
+        if (!finished || !win)
             return;
 
         SpawnLevel();
@@ -59,6 +58,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
     private void SpawnLevel()
     {
+        finished = false;
         win = false;
 
         int persistent = StackManager.Instance.persistentPlacedCount;
@@ -70,6 +70,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
             pos.z += GameUtil.DefaultStackScale.z * persistent;
 
         f.transform.position = pos;
+
         StackManager.Instance.StartSpawning(currentLevel.length);
 
         StackManager.CAN_PLACE = true;
@@ -77,7 +78,12 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
     public void FinishLevel(bool success)
     {
-        if (success)
+        if (finished)
+            return;
+
+        StackManager.CAN_PLACE = false;
+        finished = true;
+        if (win = success)
         {
             var currentLevelId = PlayerPrefs.GetInt("LevelId", 0);
             if (currentLevelId + 1 >= levels.Length)
@@ -85,6 +91,14 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
             PlayerPrefs.SetInt("LevelId", currentLevelId + 1);
 
             StackManager.Instance.persistentPlacedCount++; //Also Count For Finish Line
+        }
+        else
+        {
+            DOVirtual.DelayedCall(3f, () =>
+            {
+                StackManager.CAN_PLACE = true;
+                SceneManager.LoadScene(0);
+            });
         }
     }
 }
