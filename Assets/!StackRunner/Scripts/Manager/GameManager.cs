@@ -18,8 +18,6 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     public bool finished = false;
     public bool win = false;
 
-    private float pitch = 1;
-
     private void OnEnable()
     {
         Stack.OnLastPlace -= OnLastPlace;

@@ -25,12 +25,19 @@ public class StackManager : MonoBehaviourSingleton<StackManager>
     public int allowedStackCount = 0;
 
     public static bool CAN_PLACE = true;
+
+    PoolManager<Stack> stackPool;
     public void StartSpawning(int allowedStackCount)
     {
         this.allowedStackCount = allowedStackCount;
 
         placedFirstStack = false;
         placedStackCount = 0;
+
+        foreach(var s in stackPool.GetAllActive())
+        {
+            s.Pool();
+        }
 
         GetNextStack();
     }
@@ -56,6 +63,8 @@ public class StackManager : MonoBehaviourSingleton<StackManager>
 
         baseColor = Color.red; //Initial Is From Red To Ensure Vibrant Colors
         baseColor = baseColor.GetNextHue(Random.Range(0, 100));
+
+        stackPool = new PoolManager<Stack>(stackPrefab);
     }
 
     private void Update()
@@ -114,7 +123,8 @@ public class StackManager : MonoBehaviourSingleton<StackManager>
 
         bool isLast = placedStackCount + 1 == allowedStackCount;
 
-        currentStack = Instantiate(stackPrefab, stackHolder);
+        currentStack = stackPool.Get(stackHolder);
+        currentStack.DePool();
         currentStack.GetComponent<Renderer>().material.color = baseColor.GetNextHue(persistentPlacedCount);
         currentStack.name = $"Stack {placedStackCount} ({persistentPlacedCount})";
         if (!placedFirstStack)
@@ -132,7 +142,8 @@ public class StackManager : MonoBehaviourSingleton<StackManager>
 
     private void OnStackCutOff(Stack sender, float currentWidth, float cutWidth)
     {
-        var piece = Instantiate(stackPrefab, stackHolder);
+        var piece = stackPool.Get(stackHolder);
+        piece.DePool();
         piece.GetComponent<Renderer>().material.color = baseColor.GetNextHue(persistentPlacedCount);
         piece.SetWidth(cutWidth);
         piece.name = $"Stack {placedStackCount} Fall";

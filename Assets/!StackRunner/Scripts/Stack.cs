@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 [RequireComponent(typeof(BoxCollider))]
 [RequireComponent(typeof(Rigidbody))]
-public class Stack : MonoBehaviour
+public class Stack : MonoBehaviour, IPoolable
 {
     public BoxCollider boxCollider;
     public Rigidbody rigidBody;
@@ -24,6 +24,31 @@ public class Stack : MonoBehaviour
     public static UnityAction<Stack, bool> OnPlace = null; //sender, successful
     public static UnityAction<Stack, bool> OnLastPlace = null; //sender, successful
 
+    public bool IsAvailable { get; set; }
+
+    public void Pool(UnityAction onPool = null)
+    {
+        IsAvailable = true;
+
+        transform.localPosition = Vector3.zero;
+        transform.localScale = GameUtil.DefaultStackScale;
+        inPerfectPlace = false;
+
+        rigidBody.isKinematic = true;
+        rigidBody.useGravity = false;
+
+        moveTween?.Kill();
+        gameObject.SetActive(false);
+        onPool?.Invoke();
+    }
+
+    public void DePool(UnityAction onDePool = null)
+    {
+        IsAvailable = false;
+        gameObject.SetActive(true);
+        onDePool?.Invoke();
+    }
+
     public float Width
     {
         get
@@ -40,6 +65,7 @@ public class Stack : MonoBehaviour
             //    Grow(value);
         }
     }
+
     public void Init(int id, int persistentId, Stack lastStack, bool fromRight, bool last, bool autoMove = true)
     {
         this.id = id;
