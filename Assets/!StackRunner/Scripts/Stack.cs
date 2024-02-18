@@ -5,9 +5,11 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(BoxCollider))]
+[RequireComponent(typeof(Rigidbody))]
 public class Stack : MonoBehaviour
 {
     public BoxCollider boxCollider;
+    public Rigidbody rigidBody;
 
     Tween moveTween;
 
@@ -16,7 +18,7 @@ public class Stack : MonoBehaviour
 
     Stack lastStack;
 
-    public static UnityAction<Stack, float> OnCutOff = null;
+    public static UnityAction<Stack, float, float> OnCutOff = null;
 
     public float Width
     {
@@ -37,6 +39,7 @@ public class Stack : MonoBehaviour
         SetWidth(lastStack.boxCollider.bounds.size.x);
 
         boxCollider = GetComponent<BoxCollider>();
+        rigidBody = GetComponent<Rigidbody>();
 
         this.id = id;
         this.lastStack = lastStack;
@@ -74,8 +77,8 @@ public class Stack : MonoBehaviour
 
         if (inPerfectPlace) //ToDo : Perfect Placement
         {
-            transform.localPosition = lastStack.boxCollider.bounds.center 
-                                    + Vector3.forward 
+            transform.localPosition = lastStack.boxCollider.bounds.center
+                                    + Vector3.forward
                                     * GameUtil.DefaultStackScale.z;
             return;
         }
@@ -90,16 +93,14 @@ public class Stack : MonoBehaviour
             var pos = lastStack.transform.localPosition + Vector3.forward * GameUtil.DefaultStackScale.z;
 
             var lastStackWidth = lastStack.boxCollider.bounds.Width(true);
-
-            if(onLeft.Value)
+            if (onLeft.Value)
                 pos.x -= lastStackWidth - newWidth * .5f;
             else
-                pos.x += lastStackWidth + newWidth * .5f;
+                pos.x += lastStackWidth - newWidth * .5f;
 
             transform.localPosition = pos; //Set Realigned Pos
 
-            Debug.Log(Width, gameObject);
-            OnCutOff?.Invoke(this, widthDiff.Value);
+            OnCutOff?.Invoke(this, newWidth, widthDiff.Value);
         }
     }
 
@@ -119,5 +120,11 @@ public class Stack : MonoBehaviour
     private void Grow(float width)
     {
         Debug.Log("GROW");
+    }
+
+    public void Fall()
+    {
+        rigidBody.isKinematic = false;
+        rigidBody.useGravity = true;
     }
 }
