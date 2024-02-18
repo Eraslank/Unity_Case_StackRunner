@@ -2,11 +2,11 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(BoxCollider))]
 public class Stack : MonoBehaviour
 {
-
     public BoxCollider boxCollider;
 
     Tween moveTween;
@@ -15,6 +15,8 @@ public class Stack : MonoBehaviour
     public int id;
 
     Stack lastStack;
+
+    public static UnityAction<Stack, float> OnCutOff = null;
 
     public float Width
     {
@@ -29,15 +31,6 @@ public class Stack : MonoBehaviour
             else
                 Grow(value);
         }
-    }
-
-    public bool t = false;
-    private void Update()
-    {
-        if (!t)
-            return;
-        t = false;
-        Debug.Log(Width, gameObject);
     }
     public void Init(int id, Stack lastStack, bool fromRight, bool autoMove = true)
     {
@@ -90,13 +83,23 @@ public class Stack : MonoBehaviour
         var (widthDiff, onLeft) = boxCollider.bounds.GetWidthDiff(lastStack.boxCollider.bounds);
         if (widthDiff.HasValue)
         {
-            Width = Width - widthDiff.Value;
-            var posDiff = Vector3.right * widthDiff.Value * .5f;
+            var newWidth = Width - widthDiff.Value;
+            Width = newWidth; //Cut off Self
 
-            if (onLeft.Value)
-                posDiff = -posDiff;
+            //Calculate Realigned Pos
+            var pos = lastStack.transform.localPosition + Vector3.forward * GameUtil.DefaultStackScale.z;
 
-            transform.localPosition -= posDiff;
+            var lastStackWidth = lastStack.boxCollider.bounds.Width(true);
+
+            if(onLeft.Value)
+                pos.x -= lastStackWidth - newWidth * .5f;
+            else
+                pos.x += lastStackWidth + newWidth * .5f;
+
+            transform.localPosition = pos; //Set Realigned Pos
+
+            Debug.Log(Width, gameObject);
+            OnCutOff?.Invoke(this, widthDiff.Value);
         }
     }
 
@@ -105,7 +108,7 @@ public class Stack : MonoBehaviour
         inPerfectPlace = boxCollider.bounds.IsInPerfectPlace(lastStack.boxCollider.bounds);
     }
 
-    private void SetWidth(float width)
+    public void SetWidth(float width)
     {
         var s = GameUtil.DefaultStackScale;
         s.x = width;
@@ -115,5 +118,6 @@ public class Stack : MonoBehaviour
 
     private void Grow(float width)
     {
+        Debug.Log("GROW");
     }
 }

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2471283621951841178}
   - component: {fileID: 6581250211218510383}
   m_Layer: 0
-  m_Name: Stack
+  m_Name: P_Stack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -93,7 +93,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2471283621951841179}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -113,4 +113,3 @@ MonoBehaviour:
   boxCollider: {fileID: 2471283621951841178}
   inPerfectPlace: 0
   id: 0
-  t: 0

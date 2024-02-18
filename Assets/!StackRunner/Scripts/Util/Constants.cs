@@ -31,7 +31,11 @@ public static class GameUtil
 public static class BoundsExtensions
 {
 
-    public static float Width(this Bounds a) => a.size.x;
+    public static float Width(this Bounds a, bool half = false) => half switch
+    {
+        false => a.size.x,
+        _ => a.extents.x,
+    };
     public static Vector2 WidthRange(this Bounds a)
     {
         return new Vector2(a.center.x - a.extents.x, a.center.x + a.extents.x);
