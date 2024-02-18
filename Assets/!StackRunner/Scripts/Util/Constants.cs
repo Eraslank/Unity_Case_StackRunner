@@ -1,3 +1,4 @@
+using Cinemachine;
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
@@ -46,6 +47,14 @@ public static class GameUtil
         h += shiftAmount * HueShiftScale;
         h = h % 1f; //Max value it can be. For non-hdr, it is 1
         return Color.HSVToRGB(h, s, v, false);
+    }
+    public static Tween DODollyPath(this CinemachineVirtualCamera c)
+    {
+        var dolly = c.GetCinemachineComponent<CinemachineTrackedDolly>();
+        return DOVirtual.Float(0, 1, 6f, x =>
+        {
+            dolly.m_PathPosition = x;
+        }).SetLoops(-1, LoopType.Restart).SetEase(Ease.Linear);
     }
 }
 

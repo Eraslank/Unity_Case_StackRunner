@@ -114,8 +114,6 @@ public class StackManager : MonoBehaviourSingleton<StackManager>
 
         bool isLast = placedStackCount + 1 == allowedStackCount;
 
-        Debug.Log("Get");
-
         currentStack = Instantiate(stackPrefab, stackHolder);
         currentStack.GetComponent<Renderer>().material.color = baseColor.GetNextHue(persistentPlacedCount);
         currentStack.name = $"Stack {placedStackCount} ({persistentPlacedCount})";

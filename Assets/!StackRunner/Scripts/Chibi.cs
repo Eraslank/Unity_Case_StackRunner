@@ -1,3 +1,4 @@
+using Cinemachine;
 using DG.Tweening;
 using System;
 using System.Collections;
@@ -7,15 +8,19 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Animator))]
-public class Chibi : MonoBehaviour
+public class Chibi : MonoBehaviourSingleton<Chibi>
 {
     [SerializeField] Animator animator;
     [SerializeField] Transform chibiRoot;
     [SerializeField] Transform chibiT;
 
+    [SerializeField] CinemachineVirtualCamera rotateCam;
+
     Queue<Stack> moveRequest = new Queue<Stack>();
 
     private bool moving = false;
+
+    Tween dollyTween;
 
     private void OnEnable()
     {
@@ -26,6 +31,8 @@ public class Chibi : MonoBehaviour
         Stack.OnLastPlace += OnLastPlace;
 
         animator.SetBool("IsDancing", true);
+
+        dollyTween = rotateCam.DODollyPath();
     }
     private void OnDisable()
     {
@@ -34,6 +41,8 @@ public class Chibi : MonoBehaviour
 
         chibiT.DOKill();
         chibiRoot.DOKill();
+
+        dollyTween?.Kill();
     }
     private void OnStackPlace(Stack sender, bool successful)
     {
@@ -83,6 +92,7 @@ public class Chibi : MonoBehaviour
                 pos = stack.transform.position.x;
                 lastDelay = 0;
             }
+            rotateCam.Priority = (stack == null) ? 11 : 9;
 
             chibiT.transform.DOMoveX(pos, 3f)
                             .SetDelay(lastDelay)
