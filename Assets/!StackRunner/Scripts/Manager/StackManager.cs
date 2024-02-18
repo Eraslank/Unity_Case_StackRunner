@@ -2,10 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StackManager : MonoBehaviour
+public class StackManager : MonoBehaviourSingleton<StackManager>
 {
     [SerializeField] Stack stackPrefab;
-    [SerializeField] Stack fallingPiecePrefab;
     [SerializeField] Transform stackHolder;
 
     Stack currentStack;
@@ -29,7 +28,7 @@ public class StackManager : MonoBehaviour
     private void Awake()
     {
         baseColor = Color.red; //Initial Is From Red To Ensure Vibrant Colors
-        baseColor = baseColor.GetNextHue(Random.Range(0,100));
+        baseColor = baseColor.GetNextHue(Random.Range(0, 100));
         GetNextStack();
     }
 
@@ -94,4 +93,6 @@ public class StackManager : MonoBehaviour
 
         piece.Fall();
     }
+
+    public Stack GetLastPlaced() => lastPlacedStack;
 }

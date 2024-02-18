@@ -18,7 +18,8 @@ public class Stack : MonoBehaviour
 
     Stack lastStack;
 
-    public static UnityAction<Stack, float, float> OnCutOff = null;
+    public static UnityAction<Stack, float, float> OnCutOff = null; //sender, currentWidth, cutWidth
+    public static UnityAction<Stack, bool> OnPlace = null; //sender, successful
 
     public float Width
     {
@@ -71,7 +72,7 @@ public class Stack : MonoBehaviour
                              .SetEase(Ease.InOutSine);
     }
 
-    public void Place()
+    public bool Place()
     {
         moveTween?.Kill();
 
@@ -80,17 +81,20 @@ public class Stack : MonoBehaviour
             transform.localPosition = lastStack.boxCollider.bounds.center
                                     + Vector3.forward
                                     * GameUtil.DefaultStackScale.z;
-            return;
+
+            OnPlace?.Invoke(this, true);
+            return true;
         }
 
         var (widthDiff, onLeft) = boxCollider.bounds.GetWidthDiff(lastStack.boxCollider.bounds);
         if (widthDiff.HasValue)
         {
             var newWidth = Width - widthDiff.Value;
-            Width = newWidth; //Cut off Self
+            Width = newWidth; //Cut Off Self
 
             //Calculate Realigned Pos
-            var pos = lastStack.transform.localPosition + Vector3.forward * GameUtil.DefaultStackScale.z;
+            var pos = transform.localPosition;
+            pos.x = lastStack.transform.localPosition.x;
 
             var lastStackWidth = lastStack.boxCollider.bounds.Width(false);
             if (onLeft.Value)
@@ -101,7 +105,14 @@ public class Stack : MonoBehaviour
             transform.localPosition = pos; //Set Realigned Pos
 
             OnCutOff?.Invoke(this, newWidth, widthDiff.Value);
+            OnPlace?.Invoke(this, true);
+
+            return true;
         }
+
+        OnPlace?.Invoke(this, false);
+
+        return false;
     }
 
     private void TryCheckPerfectPlace()

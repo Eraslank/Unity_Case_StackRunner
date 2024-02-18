@@ -1828,7 +1828,7 @@ GameObject:
   m_Component:
   - component: {fileID: 604125042}
   m_Layer: 0
-  m_Name: Chibi_Pos
+  m_Name: Padding
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7897,6 +7897,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 604125042}
     m_Modifications:
+    - target: {fileID: 2590655858868753939, guid: 8ebf841af362818409cf000d8f1a2345, type: 3}
+      propertyPath: chibiRoot
+      value: 
+      objectReference: {fileID: 889751901}
     - target: {fileID: 4978699718255468484, guid: 8ebf841af362818409cf000d8f1a2345, type: 3}
       propertyPath: m_Name
       value: Chibi

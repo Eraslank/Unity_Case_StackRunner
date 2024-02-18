@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -33,6 +34,12 @@ public static class GameUtil
             return .025f;
         }
     }
+
+    public static Tween DOSpeed(this Animator a, float begin, float end, float duration = .5f)
+    {
+        return DOVirtual.Float(begin, end, duration, x => a.speed = x);
+    }
+
     public static Color GetNextHue(this Color c, int shiftAmount)
     {
         Color.RGBToHSV(c, out var h, out var s, out var v);
