@@ -8,8 +8,12 @@ public class StackManager : MonoBehaviour
     [SerializeField] Transform stackHolder;
 
     Stack currentStack;
+    Stack lastPlacedStack;
 
     int placedStacks = 0;
+
+    private bool placedFirstStack = false;
+
     private void Awake()
     {
         GetNextStack();
@@ -17,7 +21,7 @@ public class StackManager : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0))
         {
             PlaceStack();
         }
@@ -25,14 +29,35 @@ public class StackManager : MonoBehaviour
 
     private void PlaceStack()
     {
-        ++placedStacks;
+        lastPlacedStack = currentStack;
         currentStack.Place();
-        GetNextStack();
+        ++placedStacks;
+
+        StartCoroutine(C_PlaceStack());
+        IEnumerator C_PlaceStack()
+        {
+            yield return new WaitForFixedUpdate();
+            GetNextStack();
+        }
     }
 
     private void GetNextStack()
     {
         currentStack = Instantiate(stackPrefab, stackHolder);
-        currentStack.transform.localPosition = Vector3.forward * placedStacks * GameUtil.DefaultStackScale.z;
+        if (!placedFirstStack)
+        {
+            placedFirstStack = true;
+            lastPlacedStack = currentStack;
+
+            currentStack.Init(placedStacks, lastPlacedStack, false, autoMove: false);
+
+            currentStack.inPerfectPlace = true;
+            PlaceStack();
+
+            lastPlacedStack.transform.localPosition = Vector3.zero;
+            return;
+        }
+
+        currentStack.Init(placedStacks, lastPlacedStack, placedStacks % 2 == 0);
     }
 }
