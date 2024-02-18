@@ -11,10 +11,11 @@ public class StackManager : MonoBehaviour
     Stack currentStack;
     Stack lastPlacedStack;
 
-    int placedStacks = 0;
+    int placedStackCount = 0;
 
     private bool placedFirstStack = false;
 
+    Color baseColor;
     private void OnEnable()
     {
         Stack.OnCutOff -= OnStackCutOff;
@@ -27,6 +28,8 @@ public class StackManager : MonoBehaviour
 
     private void Awake()
     {
+        baseColor = Color.red; //Initial Is From Red To Ensure Vibrant Colors
+        baseColor = baseColor.GetNextHue(Random.Range(0,100));
         GetNextStack();
     }
 
@@ -42,7 +45,7 @@ public class StackManager : MonoBehaviour
     {
         currentStack.Place();
         lastPlacedStack = currentStack;
-        ++placedStacks;
+        ++placedStackCount;
 
         StartCoroutine(C_PlaceStack());
         IEnumerator C_PlaceStack()
@@ -55,13 +58,14 @@ public class StackManager : MonoBehaviour
     private void GetNextStack()
     {
         currentStack = Instantiate(stackPrefab, stackHolder);
-        currentStack.name = $"Stack {placedStacks}";
+        currentStack.GetComponent<Renderer>().material.color = baseColor.GetNextHue(placedStackCount);
+        currentStack.name = $"Stack {placedStackCount}";
         if (!placedFirstStack)
         {
             placedFirstStack = true;
             lastPlacedStack = currentStack;
 
-            currentStack.Init(placedStacks, lastPlacedStack, false, autoMove: false);
+            currentStack.Init(placedStackCount, lastPlacedStack, false, autoMove: false);
 
             currentStack.inPerfectPlace = true;
             PlaceStack();
@@ -70,14 +74,15 @@ public class StackManager : MonoBehaviour
             return;
         }
 
-        currentStack.Init(placedStacks, lastPlacedStack, placedStacks % 2 == 0);
+        currentStack.Init(placedStackCount, lastPlacedStack, placedStackCount % 2 == 0);
     }
 
     private void OnStackCutOff(Stack sender, float currentWidth, float cutWidth)
     {
         var piece = Instantiate(stackPrefab, stackHolder);
+        piece.GetComponent<Renderer>().material.color = baseColor.GetNextHue(placedStackCount);
         piece.SetWidth(cutWidth);
-        piece.name = $"Stack {placedStacks} Fall";
+        piece.name = $"Stack {placedStackCount} Fall";
         piece.transform.position = sender.transform.position;
 
         var posDiff = Vector3.right * cutWidth * .5f;

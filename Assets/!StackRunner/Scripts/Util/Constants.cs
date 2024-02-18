@@ -26,6 +26,20 @@ public static class GameUtil
             return .25f;
         }
     }
+    public static float HueShiftScale
+    {
+        get
+        {
+            return .025f;
+        }
+    }
+    public static Color GetNextHue(this Color c, int shiftAmount)
+    {
+        Color.RGBToHSV(c, out var h, out var s, out var v);
+        h += shiftAmount * HueShiftScale;
+        h = h % 1f; //Max value it can be. For non-hdr, it is 1
+        return Color.HSVToRGB(h, s, v, false);
+    }
 }
 
 public static class BoundsExtensions
