@@ -10,12 +10,13 @@ public class AudioManager : MonoBehaviourSingleton<AudioManager>
 
     private float pitch = 1;
 
+    int consecutive = 0;
     public float Pitch
-    { 
-        get 
-        { 
-            return pitch; 
-        } 
+    {
+        get
+        {
+            return pitch;
+        }
         set
         {
             pitch = value;
@@ -29,11 +30,13 @@ public class AudioManager : MonoBehaviourSingleton<AudioManager>
     public void ResetPitch()
     {
         Pitch = 1;
+        consecutive = 0;
     }
 
     public void IncreasePitch()
     {
         Pitch += GameUtil.PitchIncrement;
+        consecutive++;
     }
 
     private void SetPitch()
@@ -43,8 +46,9 @@ public class AudioManager : MonoBehaviourSingleton<AudioManager>
 
     public void Play()
     {
-        foreach(var d in dingSources)
+        for (int i = 0; i < (consecutive > 4 ? dingSources.Length : 1); i++)
         {
+            var d = dingSources[i];
             d.Stop();
             d.Play();
         }

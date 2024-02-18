@@ -60,6 +60,9 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         if (!finished || !win)
             return;
 
+        if (Chibi.Instance.moving)
+            return;
+
         SpawnLevel();
     }
 

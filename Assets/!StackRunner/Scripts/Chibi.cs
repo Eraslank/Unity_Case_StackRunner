@@ -18,7 +18,7 @@ public class Chibi : MonoBehaviourSingleton<Chibi>
 
     Queue<Stack> moveRequest = new Queue<Stack>();
 
-    private bool moving = false;
+    public bool moving = false;
 
     Tween dollyTween;
 
