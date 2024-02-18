@@ -32,10 +32,12 @@ public class Stack : MonoBehaviour
         }
         set
         {
-            if (value <= lastStack.boxCollider.bounds.size.x)
-                SetWidth(value);
-            else
-                Grow(value);
+
+            SetWidth(value);
+            //if (value <= lastStack.boxCollider.bounds.size.x)
+            //    SetWidth(value);
+            //else
+            //    Grow(value);
         }
     }
     public void Init(int id, int persistentId, Stack lastStack, bool fromRight, bool last, bool autoMove = true)

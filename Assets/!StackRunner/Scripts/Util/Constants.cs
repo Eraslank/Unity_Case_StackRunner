@@ -21,6 +21,20 @@ public static class GameUtil
         }
     }
 
+    public static float PitchIncrement
+    {
+        get
+        {
+            return .1f;
+        }
+    }
+    public static float MaxPitch
+    {
+        get
+        {
+            return 2f;
+        }
+    }
     public static float PosDiffTolerance
     {
         get

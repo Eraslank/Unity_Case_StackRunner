@@ -2,7 +2,9 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviourSingleton<GameManager>
@@ -15,6 +17,8 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
     public bool finished = false;
     public bool win = false;
+
+    private float pitch = 1;
 
     private void OnEnable()
     {
@@ -35,8 +39,18 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     }
     private void OnPlace(Stack sender, bool successful)
     {
-        if (successful)
+        if (sender.id == 0)
+        {
             return;
+        }
+
+        if (sender.inPerfectPlace)
+            AudioManager.Instance.IncreasePitch();
+        else
+            AudioManager.Instance.ResetPitch();
+
+
+        AudioManager.Instance.Play();
     }
 
     private void OnLastPlace(Stack sender, bool successful)
