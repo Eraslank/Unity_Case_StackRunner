@@ -15,11 +15,14 @@ public class Stack : MonoBehaviour
 
     public bool inPerfectPlace = false;
     public int id;
+    public int persistentId;
+    private bool last = false;
 
     Stack lastStack;
 
     public static UnityAction<Stack, float, float> OnCutOff = null; //sender, currentWidth, cutWidth
     public static UnityAction<Stack, bool> OnPlace = null; //sender, successful
+    public static UnityAction<Stack, bool> OnLastPlace = null; //sender, successful
 
     public float Width
     {
@@ -35,21 +38,30 @@ public class Stack : MonoBehaviour
                 Grow(value);
         }
     }
-    public void Init(int id, Stack lastStack, bool fromRight, bool autoMove = true)
+    public void Init(int id, int persistentId, Stack lastStack, bool fromRight, bool last, bool autoMove = true)
     {
+        this.id = id;
+        this.persistentId = persistentId;
+
+        this.last = last;
+        this.lastStack = lastStack;
+
         SetWidth(lastStack.boxCollider.bounds.size.x);
 
         boxCollider = GetComponent<BoxCollider>();
         rigidBody = GetComponent<Rigidbody>();
 
-        this.id = id;
-        this.lastStack = lastStack;
-
-        var fwd = Vector3.forward * id * GameUtil.DefaultStackScale.z;
+        var fwd = Vector3.forward * persistentId * GameUtil.DefaultStackScale.z;
 
         var right = Vector3.right * (lastStack.boxCollider.bounds.center.x
                                     + GameUtil.DefaultStackScale.x
                                     * (fromRight ? 1 : -1));
+
+        if (id == 0)
+        {
+            fwd.z += StackManager.Instance.persistentPlacedCount - 1 * GameUtil.DefaultStackScale.z;
+            right = Vector3.zero;
+        }
 
         transform.localPosition = fwd + right;
 
@@ -78,11 +90,18 @@ public class Stack : MonoBehaviour
 
         if (inPerfectPlace) //ToDo : Perfect Placement
         {
+
             transform.localPosition = lastStack.boxCollider.bounds.center
                                     + Vector3.forward
                                     * GameUtil.DefaultStackScale.z;
+            if (id == 0)
+            {
+                transform.localPosition *= StackManager.Instance.persistentPlacedCount;
+            }
 
             OnPlace?.Invoke(this, true);
+            if (last)
+                OnLastPlace?.Invoke(this, true);
             return true;
         }
 
@@ -106,11 +125,15 @@ public class Stack : MonoBehaviour
 
             OnCutOff?.Invoke(this, newWidth, widthDiff.Value);
             OnPlace?.Invoke(this, true);
+            if (last)
+                OnLastPlace?.Invoke(this, true);
 
             return true;
         }
 
         OnPlace?.Invoke(this, false);
+        if (last)
+            OnLastPlace?.Invoke(this, false);
 
         return false;
     }

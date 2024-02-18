@@ -16,21 +16,25 @@ public class Chibi : MonoBehaviour
     Queue<Stack> moveRequest = new Queue<Stack>();
 
     private bool moving = false;
+
     private void OnEnable()
     {
         Stack.OnPlace -= OnStackPlace;
         Stack.OnPlace += OnStackPlace;
+
+        Stack.OnLastPlace -= OnLastPlace;
+        Stack.OnLastPlace += OnLastPlace;
 
         animator.SetBool("IsDancing", true);
     }
     private void OnDisable()
     {
         Stack.OnPlace -= OnStackPlace;
+        Stack.OnLastPlace -= OnLastPlace;
     }
-
     private void OnStackPlace(Stack sender, bool successful)
     {
-        if (sender.id == 0)
+        if (sender.persistentId == 0) //Wait On Initial
             return;
 
         if (!successful)
@@ -44,16 +48,22 @@ public class Chibi : MonoBehaviour
         TryMove();
     }
 
+    private void OnLastPlace(Stack sender, bool successful)
+    {
+        moveRequest.Enqueue(null);
+        TryMove();
+    }
+
     private void TryMove()
     {
         if (moving)
             return;
 
         if (moveRequest.TryDequeue(out var s))
-            MoveToStack(s);
+            Move(s);
     }
 
-    private void MoveToStack(Stack stack)
+    private void Move(Stack stack = null)
     {
         moving = true;
 
@@ -63,7 +73,16 @@ public class Chibi : MonoBehaviour
 
         IEnumerator C_MoveToStack()
         {
-            chibiT.transform.DOMoveX(stack.transform.position.x, 3f)
+            float lastDelay = .5f;
+            float pos = 0;
+            if (stack != null)
+            {
+                pos = stack.transform.position.x;
+                lastDelay = 0;
+            }
+
+            chibiT.transform.DOMoveX(pos, 3f)
+                            .SetDelay(lastDelay)
                             .SetSpeedBased();
 
             yield return chibiRoot.transform.DOMoveZ(GameUtil.DefaultStackScale.z, 4f)
@@ -78,7 +97,7 @@ public class Chibi : MonoBehaviour
             animator.SetBool("IsDancing", !moving);
 
             if (moveRequest.TryDequeue(out var s))
-                MoveToStack(s);
+                Move(s);
         }
     }
 
